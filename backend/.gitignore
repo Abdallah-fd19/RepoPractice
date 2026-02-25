@@ -1,0 +1,20 @@
+# Python
+*.pyc
+__pycache__/
+
+# Virtual environment
+venv/
+env/
+
+# Django media and static
+media/
+staticfiles/
+
+# Secret files
+.env
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+
