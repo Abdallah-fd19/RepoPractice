@@ -8,6 +8,9 @@ class Profile(models.Model):
  user = models.OneToOneField(User, on_delete=models.CASCADE)
  bio = models.TextField(blank=True, null=True)
  avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+ github_access_token = models.CharField(max_length=255, blank=True, null=True)
+ github_username = models.CharField(max_length=100, blank=True, null=True)
+
  
  def __self__(self):
   return f"{self.user.username}"

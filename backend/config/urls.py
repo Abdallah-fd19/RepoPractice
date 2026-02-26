@@ -22,6 +22,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
+    path('auth/github/', include('github_integration.urls')),
 ]
 
 if settings.DEBUG:
