@@ -1,8 +1,10 @@
 import uuid
+import json
 from django.shortcuts import redirect
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth import login
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -82,5 +84,34 @@ class GitHubCallbackView(APIView):
 			}
 		}
 
-		return Response(data, status=status.HTTP_200_OK)
+		# Store the data in session for retrieval by frontend
+		request.session['github_auth_data'] = data
+		
+		# Redirect back to frontend with auth data
+		frontend_callback_url = settings.GITHUB_OAUTH_FRONTEND_CALLBACK_URL
+		return redirect(f"{frontend_callback_url}?code={code}&state={state}")
+
+
+class GitHubCompleteView(APIView):
+	@csrf_exempt
+	def post(self, request):
+		"""
+		Complete the OAuth flow by retrieving the authenticated user data.
+		The frontend sends the code and state, and we retrieve the user data
+		from the session.
+		"""
+		try:
+			# Get the stored auth data from session
+			auth_data = request.session.get('github_auth_data')
+			if not auth_data:
+				return Response({'detail': 'No authentication data found in session. Please try logging in again.'}, status=status.HTTP_400_BAD_REQUEST)
+
+			# Clear the session data
+			request.session.pop('github_auth_data', None)
+
+			return Response(auth_data, status=status.HTTP_200_OK)
+
+		except Exception as e:
+			return Response({'detail': 'Failed to complete GitHub authentication', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
