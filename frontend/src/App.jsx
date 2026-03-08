@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import GitHubCallback from './pages/GitHubCallback.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
+import { ProtectedRoute } from './components/ProtectedRoute.jsx';
 import './index.css';
 
 function App() {
@@ -17,7 +18,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/auth/github/callback" element={<GitHubCallback />} />
-              <Route path="/dashboard" element={<Dashboard/>}/>        
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/>        
             </Routes>
           </div>
         </Router>
