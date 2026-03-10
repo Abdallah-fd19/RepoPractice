@@ -80,20 +80,33 @@ export const AuthProvider = ({ children }) => {
     window.location.href = `${API_BASE_URL}/auth/github/login/`;
   };
 
-  const handleGithubCallback = async (tokens) => {
+  /**
+   * Complete GitHub OAuth on the frontend by storing the user + tokens
+   * returned from the backend `/auth/github/complete/` endpoint.
+   */
+  const handleGithubCallback = async (authData) => {
     try {
-      setUser({
-        id: tokens.user.id,
-        username: tokens.user.username,
-        email: tokens.user.email,
-      });
-      setTokens({
-        access: tokens.tokens.access,
-        refresh: tokens.tokens.refresh,
-      });
-      localStorage.setItem('user', JSON.stringify(tokens.user));
-      localStorage.setItem('tokens', JSON.stringify(tokens.tokens));
+      if (!authData || !authData.user || !authData.tokens) {
+        throw new Error('Invalid authentication data from GitHub');
+      }
+
+      const userData = {
+        id: authData.user.id,
+        username: authData.user.username,
+        email: authData.user.email,
+      };
+
+      const tokenData = {
+        access: authData.tokens.access,
+        refresh: authData.tokens.refresh,
+      };
+
+      setUser(userData);
+      setTokens(tokenData);
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('tokens', JSON.stringify(tokenData));
       setError(null);
+
       return { success: true };
     } catch (err) {
       setError(err.message);

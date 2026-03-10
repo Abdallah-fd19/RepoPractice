@@ -22,9 +22,9 @@ const GitHubCallback = () => {
         const code = searchParams.get('code');
         const state = searchParams.get('state');
 
-        if (!code) {
-          setError('No authorization code received');
-          console.log('No authorization code received');
+        if (!code || !state) {
+          setError('Missing authorization parameters from GitHub');
+          console.log('Missing authorization parameters from GitHub');
           setTimeout(() => navigate('/login'), 2000);
           return;
         }
@@ -33,7 +33,7 @@ const GitHubCallback = () => {
         // We'll use the session to get the tokens back
         const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         
-        // Make a call to a new endpoint that completes the OAuth flow
+        // Complete the OAuth flow using the session established during redirect
         const response = await fetch(`${API_BASE_URL}/auth/github/complete/`, {
           method: 'POST',
           headers: {

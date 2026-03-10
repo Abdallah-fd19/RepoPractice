@@ -18,3 +18,4 @@ staticfiles/
 .idea/
 *.swp
 
+db.sqlite3
