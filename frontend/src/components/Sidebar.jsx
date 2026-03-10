@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
 import { IoMdStats } from "react-icons/io";
 import { RiArrowDropRightLine } from "react-icons/ri";
@@ -7,6 +8,7 @@ import { CgDarkMode } from "react-icons/cg";
 import { VscLayoutSidebarLeftOff, VscLayoutSidebarLeft } from "react-icons/vsc";
 import { FiBarChart2, FiTrendingUp, FiSettings, FiHome } from "react-icons/fi";
 import { useTheme } from "../contexts/ThemeContext";
+import { useAuth } from "../contexts/AuthContext.jsx";
 
 function NavItem({ isCollapsed, title, icon, items, isActive = false, onNavClick }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -71,9 +73,16 @@ function NavItem({ isCollapsed, title, icon, items, isActive = false, onNavClick
 }
 
 function SideBar() {
-  const {theme, toggleTheme} = useTheme();
+  const { theme, toggleTheme } = useTheme();
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeNav, setActiveNav] = useState("Stats");
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <>
@@ -183,8 +192,8 @@ function SideBar() {
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 truncate">User Name</p>
-                <p className="text-xs text-gray-500 truncate">Administrator</p>
+                <p className="text-sm font-semibold text-gray-900 truncate">{user?.username ?? "User"}</p>
+                <p className="text-xs text-gray-500 truncate">{user?.email ?? "Administrator"}</p>
               </div>
             )}
           </div>
@@ -194,7 +203,12 @@ function SideBar() {
               <button className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 rounded-lg transition-colors duration-200 border border-gray-200">
                 Edit Profile
               </button>
-              <button className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                aria-label="Log out"
+              >
                 <IoLogOutOutline size={20} />
               </button>
             </div>
@@ -202,7 +216,12 @@ function SideBar() {
 
           {isCollapsed && (
             <div className="flex justify-center">
-              <button className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                aria-label="Log out"
+              >
                 <IoLogOutOutline size={20} />
               </button>
             </div>

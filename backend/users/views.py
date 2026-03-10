@@ -56,16 +56,25 @@ class LoginView(APIView):
  def post(self, request):
   serializer = LoginSerializer(data=request.data)
   if serializer.is_valid():
-   username = serializer.validated_data["username"]
+   email = serializer.validated_data["email"]
    password = serializer.validated_data["password"]
-   
-   user = authenticate(username=username, password=password)
 
-   if user is None:
-    return Response({"errors":["Invalid username or password"]}, status=status.HTTP_401_UNAUTHORIZED)
-   
+   try:
+    user = User.objects.get(email__iexact=email)
+   except User.DoesNotExist:
+    return Response(
+     {"detail": "Invalid email or password"},
+     status=status.HTTP_401_UNAUTHORIZED
+    )
+
+   if not user.check_password(password):
+    return Response(
+     {"detail": "Invalid email or password"},
+     status=status.HTTP_401_UNAUTHORIZED
+    )
+
    refresh = RefreshToken.for_user(user)
-   
+
    return Response({
     "message": "Login successful",
     "user":{
@@ -79,6 +88,7 @@ class LoginView(APIView):
     }
    }, status=status.HTTP_200_OK)
   
+  return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProfileView(APIView):
  permission_classes = [IsAuthenticated]
