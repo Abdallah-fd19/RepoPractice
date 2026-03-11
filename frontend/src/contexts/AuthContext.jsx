@@ -161,6 +161,19 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  const authFetch = async (input, init = {}) => {
+    if (!tokens?.access) {
+      throw new Error('Not authenticated');
+    }
+
+    const headers = {
+      ...(init.headers || {}),
+      Authorization: `Bearer ${tokens.access}`,
+    };
+
+    return fetch(input, { ...init, headers });
+  };
+
   const value = {
     user,
     loading,
@@ -170,7 +183,8 @@ export const AuthProvider = ({ children }) => {
     signup,
     logout,
     githubLogin,
-    handleGithubCallback
+    handleGithubCallback,
+    authFetch,
   };
 
   return (
