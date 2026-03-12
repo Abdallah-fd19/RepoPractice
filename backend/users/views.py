@@ -100,7 +100,7 @@ class ProfileView(APIView):
  
  def put(self, request):
   profile = request.user.profile
-  serializer = ProfileSerializer(profile, data=request.data)
+  serializer = ProfileSerializer(profile, data=request.data, context={"request": request})
 
   if serializer.is_valid():
    serializer.save()
@@ -110,7 +110,7 @@ class ProfileView(APIView):
  
  def patch(self, request):
   profile = request.user.profile
-  serializer = ProfileSerializer(profile, data=request.data, partial=True)
+  serializer = ProfileSerializer(profile, data=request.data, partial=True, context={"request": request})
 
   if serializer.is_valid():
    serializer.save()

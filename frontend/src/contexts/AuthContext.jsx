@@ -114,6 +114,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+
+  const loadProfile = async () => {
+    try{
+      setError(null);
+      const response = await authFetch(`${API_BASE_URL}/users/profile/`, { method: 'GET' });
+      if (!response.ok){
+        throw new Error('Failed to load profile');
+      }
+      const data = await response.json();
+      const userData = {
+        id: data.user.id,
+        username: data.user.username,
+        email: data.user.email,
+        bio: data.bio,
+        github_username: data.github_username,
+      }
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setError(null);
+      return { success: true };
+    }
+    catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
   const signup = async (name, email, password) => {
     try {
       setLoading(true);
@@ -183,6 +210,7 @@ export const AuthProvider = ({ children }) => {
     signup,
     logout,
     githubLogin,
+    loadProfile,
     handleGithubCallback,
     authFetch,
   };

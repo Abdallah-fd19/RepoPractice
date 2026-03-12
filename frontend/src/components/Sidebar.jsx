@@ -200,7 +200,11 @@ function SideBar() {
 
           {!isCollapsed && (
             <div className="flex items-center gap-2">
-              <button className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 rounded-lg transition-colors duration-200 border border-gray-200">
+              <button
+                type="button"
+                onClick={() => navigate("/profile")}
+                className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 rounded-lg transition-colors duration-200 border border-gray-200"
+              >
                 Edit Profile
               </button>
               <button

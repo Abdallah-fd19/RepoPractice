@@ -11,7 +11,6 @@ class Profile(models.Model):
  github_access_token = models.CharField(max_length=255, blank=True, null=True)
  github_username = models.CharField(max_length=100, blank=True, null=True)
 
- 
- def __self__(self):
+ def __str__(self):
   return f"{self.user.username}"
  

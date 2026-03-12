@@ -3,6 +3,7 @@ import Login from './pages/Login.jsx';
 import SignUp from './pages/SignUp.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import GitHubCallback from './pages/GitHubCallback.jsx';
+import Profile from './pages/Profile.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
@@ -20,6 +21,7 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/auth/github/callback" element={<GitHubCallback />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             </Routes>
           </div>
         </Router>
