@@ -6,13 +6,24 @@ import Button from "../components/Button.jsx";
 
 export default function Profile() {
   const { user, loadProfile, authFetch, error, loading } = useAuth();
+  const apiBaseUrl = useMemo(() => import.meta.env.VITE_API_URL || "http://localhost:8000", []);
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [localError, setLocalError] = useState("");
 
   const githubUsername = useMemo(() => user?.github_username || "", [user]);
+
+  const hasChanges = useMemo(
+    () =>
+      username.trim() !== (user?.username ?? "") ||
+      bio !== (user?.bio ?? "") ||
+      !!avatarFile,
+    [username, bio, avatarFile, user?.username, user?.bio]
+  );
 
   useEffect(() => {
     loadProfile?.();
@@ -22,22 +33,44 @@ export default function Profile() {
   useEffect(() => {
     setUsername(user?.username ?? "");
     setBio(user?.bio ?? "");
-  }, [user?.username, user?.bio]);
+    if (user?.avatar) {
+      setAvatarPreview(
+        user.avatar.startsWith("http")
+          ? user.avatar
+          : `${apiBaseUrl}${user.avatar}`
+      );
+    } else {
+      setAvatarPreview(null);
+    }
+    setAvatarFile(null);
+  }, [user?.username, user?.bio, user?.avatar, apiBaseUrl]);
 
   const handleSave = async () => {
     setLocalError("");
     setSuccessMessage("");
     setSaving(true);
     try {
-      const response = await authFetch(`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/users/profile/`, {
+      const formData = new FormData();
+      if (username.trim()) {
+        formData.append("username", username.trim());
+      }
+      formData.append("bio", bio ?? "");
+      if (avatarFile) {
+        formData.append("avatar", avatarFile);
+      }
+
+      const response = await authFetch(`${apiBaseUrl}/users/profile/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: username.trim() || undefined, bio }),
+        body: formData,
       });
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        const message = data.username?.[0] || data.detail || "Failed to update profile";
+        const message =
+          data.username?.[0] ||
+          data.avatar?.[0] ||
+          data.detail ||
+          "Failed to update profile";
         throw new Error(message);
       }
 
@@ -66,6 +99,32 @@ export default function Profile() {
               <CardDescription>Username can be updated below; email and GitHub are read-only.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Avatar" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-sm text-gray-500">No avatar</span>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Avatar</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setAvatarFile(file);
+                        setAvatarPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                    className="text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload a square image for best results.</p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
@@ -124,7 +183,7 @@ export default function Profile() {
               )}
 
               <div className="flex items-center gap-3">
-                <Button type="button" onClick={handleSave} loading={saving} disabled={saving || loading}>
+                <Button type="button" onClick={handleSave} loading={saving} disabled={saving || loading || !hasChanges}>
                   Save changes
                 </Button>
               </div>

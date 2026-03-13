@@ -129,6 +129,7 @@ export const AuthProvider = ({ children }) => {
         email: data.user.email,
         bio: data.bio,
         github_username: data.github_username,
+        avatar: data.avatar,
       }
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
