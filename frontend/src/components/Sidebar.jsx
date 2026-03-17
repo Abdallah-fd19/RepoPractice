@@ -1,83 +1,42 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
-import { IoMdStats } from "react-icons/io";
-import { RiArrowDropRightLine } from "react-icons/ri";
 import { IoLogOutOutline } from "react-icons/io5";
 import { CgDarkMode } from "react-icons/cg";
 import { VscLayoutSidebarLeftOff, VscLayoutSidebarLeft } from "react-icons/vsc";
-import { FiBarChart2, FiTrendingUp, FiSettings, FiHome } from "react-icons/fi";
+import { FiHome, FiCode, FiList, FiGrid } from "react-icons/fi";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
-function NavItem({ isCollapsed, title, icon, items, isActive = false, onNavClick }) {
-  const [isOpen, setIsOpen] = useState(false);
+function NavLink({ isCollapsed, title, icon, to, onClick }) {
   const Icon = icon;
+  const isActive = onClick === undefined ? false : false;
   return (
-    <div className="flex flex-col gap-y-2 w-full">
-      {!isCollapsed && (
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 mb-1">
-          Platform
-        </span>
-      )}
-      <div
-        onClick={() => {
-          if (onNavClick) onNavClick(title);
-          setIsOpen(prev => !prev);
-        }}
-        className={`group flex items-center gap-x-3 relative px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer ${isActive
-          ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30"
-          : "hover:bg-primary-50 text-gray-700 hover:text-primary-700"
-          }`}
-      >
-        <div className={`p-1.5 rounded-md transition-all duration-200 ${isActive
-          ? "bg-white/20"
-          : "bg-gray-100 group-hover:bg-primary-100"
-          }`}>
-          <Icon size={20} className={isActive ? "text-white" : "text-gray-600 group-hover:text-primary-600"} />
-        </div>
-        {!isCollapsed && (
-          <>
-            <span className={`font-medium text-sm flex-1 ${isActive ? "text-white" : "text-gray-700"}`}>
-              {title}
-            </span>
-            <RiArrowDropRightLine
-              className={`absolute right-3 transition-transform duration-300 ${isOpen ? "rotate-90" : "rotate-0"} shrink-0 ${isActive ? "text-white/80" : "text-gray-400"
-                }`}
-              size={20}
-            />
-          </>
-        )}
+    <div
+      onClick={onClick}
+      className={`group flex items-center gap-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer ${isActive
+        ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30"
+        : "hover:bg-primary-50 text-gray-700 hover:text-primary-700"
+        }`}
+    >
+      <div className={`p-1.5 rounded-md transition-all duration-200 ${isActive ? "bg-white/20" : "bg-gray-100 group-hover:bg-primary-100"}`}>
+        <Icon size={20} className={isActive ? "text-white" : "text-gray-600 group-hover:text-primary-600"} />
       </div>
       {!isCollapsed && (
-        <div
-          className={`grid transition-all duration-300 ease-in-out ${isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-            }`}
-        >
-          <div className="overflow-hidden">
-            <ul className="text-sm ml-4 pl-4 border-l-2 border-l-gray-200 space-y-1 mt-1">
-              {items.map((item, index) => (
-                <li
-                  key={index}
-                  className="py-1.5 px-3 rounded-md text-gray-600 hover:bg-primary-50 hover:text-primary-700 cursor-pointer transition-all duration-200 hover:translate-x-1"
-                >
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+        <span className={`font-medium text-sm flex-1 ${isActive ? "text-white" : "text-gray-700"}`}>
+          {title}
+        </span>
       )}
     </div>
-  )
+  );
 }
 
 function SideBar() {
   const { theme, toggleTheme } = useTheme();
   const { logout, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [activeNav, setActiveNav] = useState("Stats");
 
   const handleLogout = () => {
     logout();
@@ -147,37 +106,28 @@ function SideBar() {
 
         {/* Navigation Items */}
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1 hide-scrollbar">
-          <NavItem
+          {!isCollapsed && (
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 mb-1 block">
+              Platform
+            </span>
+          )}
+          <NavLink
             isCollapsed={isCollapsed}
-            title="Stats"
-            icon={IoMdStats}
-            items={["Overview", "Reports", "Statistics"]}
-            isActive={activeNav === "Stats"}
-            onNavClick={setActiveNav}
+            title="Dashboard"
+            icon={FiHome}
+            onClick={() => navigate("/dashboard")}
           />
-          <NavItem
+          <NavLink
             isCollapsed={isCollapsed}
-            title="Analytics"
-            icon={FiBarChart2}
-            items={["Overview", "Reports", "Statistics"]}
-            isActive={activeNav === "Analytics"}
-            onNavClick={setActiveNav}
+            title="Repos"
+            icon={FiGrid}
+            onClick={() => navigate("/repos")}
           />
-          <NavItem
+          <NavLink
             isCollapsed={isCollapsed}
-            title="Trends"
-            icon={FiTrendingUp}
-            items={["Overview", "Reports", "Statistics"]}
-            isActive={activeNav === "Trends"}
-            onNavClick={setActiveNav}
-          />
-          <NavItem
-            isCollapsed={isCollapsed}
-            title="Settings"
-            icon={FiSettings}
-            items={["General", "Security", "Preferences"]}
-            isActive={activeNav === "Settings"}
-            onNavClick={setActiveNav}
+            title="Challenges"
+            icon={FiList}
+            onClick={() => navigate("/challenges")}
           />
         </div>
 

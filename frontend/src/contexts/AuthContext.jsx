@@ -189,17 +189,81 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  const getStoredTokens = () => {
+    try {
+      const raw = localStorage.getItem('tokens');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const refreshAccessToken = async (refreshToken) => {
+    const response = await fetch(`${API_BASE_URL}/users/refresh/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refresh: refreshToken }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Session expired. Please log in again.');
+    }
+
+    const data = await response.json();
+    if (!data?.access) {
+      throw new Error('Invalid refresh response from server.');
+    }
+
+    return data;
+  };
+
   const authFetch = async (input, init = {}) => {
-    if (!tokens?.access) {
+    const currentTokens = tokens || getStoredTokens();
+    if (!currentTokens?.access) {
       throw new Error('Not authenticated');
     }
 
-    const headers = {
+    const withAuthHeaders = (accessToken) => ({
       ...(init.headers || {}),
-      Authorization: `Bearer ${tokens.access}`,
-    };
+      Authorization: `Bearer ${accessToken}`,
+    });
 
-    return fetch(input, { ...init, headers });
+    let response = await fetch(input, {
+      ...init,
+      headers: withAuthHeaders(currentTokens.access),
+    });
+
+    // If access token expired/invalid, refresh once then retry.
+    if (response.status !== 401) {
+      return response;
+    }
+
+    if (!currentTokens?.refresh) {
+      logout();
+      throw new Error('Session expired. Please log in again.');
+    }
+
+    try {
+      const refreshed = await refreshAccessToken(currentTokens.refresh);
+      const updatedTokens = {
+        access: refreshed.access,
+        refresh: refreshed.refresh || currentTokens.refresh,
+      };
+
+      setTokens(updatedTokens);
+      localStorage.setItem('tokens', JSON.stringify(updatedTokens));
+
+      response = await fetch(input, {
+        ...init,
+        headers: withAuthHeaders(updatedTokens.access),
+      });
+      return response;
+    } catch (err) {
+      logout();
+      throw err instanceof Error ? err : new Error('Session expired. Please log in again.');
+    };
   };
 
   const value = {
