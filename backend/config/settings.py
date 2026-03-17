@@ -160,3 +160,6 @@ GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET', '')
 GITHUB_OAUTH_REDIRECT_URI = os.environ.get('GITHUB_OAUTH_REDIRECT_URI', '')
 # Frontend URL for OAuth callback
 GITHUB_OAUTH_FRONTEND_CALLBACK_URL = os.environ.get('GITHUB_OAUTH_FRONTEND_CALLBACK_URL', 'http://localhost:5173/auth/github/callback')
+
+# Google Gemini
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')

@@ -9,8 +9,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 
-from . import services
+from . import services, ai
+from .models import Repo, Challenge, ChallengeSubmission
+from .serializers import RepoSerializer, ChallengeSerializer, ChallengeSubmissionSerializer
 from users.models import Profile
 
 
@@ -113,5 +116,175 @@ class GitHubCompleteView(APIView):
 
 		except Exception as e:
 			return Response({'detail': 'Failed to complete GitHub authentication', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ── Repos ─────────────────────────────────────────────────────────────────────
+
+class RepoListView(APIView):
+    """GET /github/repos/ — fetch repos from GitHub and sync to DB."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = getattr(request.user, 'profile', None)
+        token = profile.github_access_token if profile else None
+        if not token:
+            return Response(
+                {'detail': 'No GitHub account connected. Please log in with GitHub first.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            gh_repos = services.get_github_repos(token)
+        except Exception as e:
+            return Response({'detail': f'Failed to fetch repos from GitHub: {e}'}, status=status.HTTP_502_BAD_GATEWAY)
+
+        synced = []
+        for r in gh_repos:
+            obj, _ = Repo.objects.update_or_create(
+                user=request.user,
+                github_id=r['id'],
+                defaults={
+                    'name': r['name'],
+                    'full_name': r['full_name'],
+                    'description': r.get('description') or '',
+                    'language': r.get('language') or '',
+                    'html_url': r['html_url'],
+                    'default_branch': r.get('default_branch', 'main'),
+                },
+            )
+            synced.append(obj)
+
+        return Response(RepoSerializer(synced, many=True).data)
+
+
+# ── Challenge generation ───────────────────────────────────────────────────────
+
+class GenerateChallengesView(APIView):
+    """POST /github/repos/<repo_id>/generate/ — generate challenges for a repo."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, repo_id):
+        try:
+            repo = Repo.objects.get(id=repo_id, user=request.user)
+        except Repo.DoesNotExist:
+            return Response({'detail': 'Repo not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        profile = getattr(request.user, 'profile', None)
+        token = profile.github_access_token if profile else None
+        if not token:
+            return Response(
+                {'detail': 'No GitHub access token found.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            all_files = services.get_repo_file_tree(token, repo.full_name, repo.default_branch)
+        except Exception as e:
+            return Response({'detail': f'Failed to read repo tree: {e}'}, status=status.HTTP_502_BAD_GATEWAY)
+
+        if not all_files:
+            return Response({'detail': 'No code files found in this repo.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        selected_paths = ai.pick_files_for_challenge(all_files, n=5)
+        if not selected_paths:
+            return Response(
+                {'detail': 'No eligible user-code files found. Try a repo with source files (not only config/infrastructure).'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        file_snippets = []
+        for path in selected_paths:
+            content = services.get_file_content(token, repo.full_name, path)
+            if content:
+                file_snippets.append({'path': path, 'content': content})
+
+        if not file_snippets:
+            return Response({'detail': 'Could not read any file content from this repo.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            raw_challenges = ai.generate_challenges(repo.full_name, file_snippets)
+        except Exception as e:
+            return Response({'detail': f'AI generation failed: {e}'}, status=status.HTTP_502_BAD_GATEWAY)
+
+        created = []
+        for c in raw_challenges:
+            obj = Challenge.objects.create(
+                user=request.user,
+                repo=repo,
+                type=c.get('type', 'refactor'),
+                title=c.get('title', 'Untitled'),
+                description=c.get('description', ''),
+                code_snippet=c.get('code_snippet', ''),
+                file_path=c.get('file_path', ''),
+                difficulty=c.get('difficulty', 'medium'),
+            )
+            created.append(obj)
+
+        return Response(ChallengeSerializer(created, many=True).data, status=status.HTTP_201_CREATED)
+
+
+# ── Challenges ─────────────────────────────────────────────────────────────────
+
+class ChallengeListView(APIView):
+    """GET /github/challenges/ — list all challenges for the user."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        challenges = Challenge.objects.filter(user=request.user).select_related('repo')
+        repo_id = request.query_params.get('repo')
+        if repo_id:
+            challenges = challenges.filter(repo_id=repo_id)
+        status_filter = request.query_params.get('status')
+        if status_filter:
+            challenges = challenges.filter(status=status_filter)
+        return Response(ChallengeSerializer(challenges, many=True).data)
+
+
+class ChallengeDetailView(APIView):
+    """GET/PATCH /github/challenges/<id>/"""
+    permission_classes = [IsAuthenticated]
+
+    def _get_challenge(self, request, pk):
+        try:
+            return Challenge.objects.get(id=pk, user=request.user)
+        except Challenge.DoesNotExist:
+            return None
+
+    def get(self, request, pk):
+        challenge = self._get_challenge(request, pk)
+        if not challenge:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(ChallengeSerializer(challenge).data)
+
+    def patch(self, request, pk):
+        challenge = self._get_challenge(request, pk)
+        if not challenge:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ChallengeSerializer(challenge, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChallengeSubmitView(APIView):
+    """POST /github/challenges/<id>/submit/"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            challenge = Challenge.objects.get(id=pk, user=request.user)
+        except Challenge.DoesNotExist:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        code = request.data.get('code', '').strip()
+        if not code:
+            return Response({'detail': 'code is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        submission = ChallengeSubmission.objects.create(challenge=challenge, code=code)
+        challenge.status = Challenge.Status.COMPLETED
+        challenge.save()
+
+        return Response(ChallengeSubmissionSerializer(submission).data, status=status.HTTP_201_CREATED)
 
 
