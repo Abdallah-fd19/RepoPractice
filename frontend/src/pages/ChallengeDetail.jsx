@@ -21,6 +21,30 @@ const TYPE_LABELS = {
   explain: "Explain",
 };
 
+const RESULT_STYLES = {
+  correct: "bg-emerald-100 text-emerald-700",
+  partial: "bg-amber-100 text-amber-700",
+  incorrect: "bg-red-100 text-red-700",
+};
+
+const RESULT_LABELS = {
+  correct: "Correct",
+  partial: "Partially Correct",
+  incorrect: "Needs Work",
+};
+
+const STATUS_STYLES = {
+  pending: "bg-gray-100 text-gray-600",
+  in_progress: "bg-blue-100 text-blue-700",
+  completed: "bg-emerald-100 text-emerald-700",
+};
+
+const STATUS_LABELS = {
+  pending: "Pending",
+  in_progress: "In Progress",
+  completed: "Completed",
+};
+
 export default function ChallengeDetail() {
   const { id } = useParams();
   const { authFetch } = useAuth();
@@ -32,6 +56,7 @@ export default function ChallengeDetail() {
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -43,7 +68,12 @@ export default function ChallengeDetail() {
         }
         const data = await res.json();
         setChallenge(data);
-        if (data.status === "completed") setSubmitted(true);
+        if (data.latest_submission) {
+          setSubmissionResult(data.latest_submission);
+          setSubmitted(data.latest_submission.result === "correct");
+        } else {
+          setSubmitted(data.status === "completed");
+        }
       } catch (e) {
         setError(e.message);
       } finally {
@@ -66,8 +96,14 @@ export default function ChallengeDetail() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.detail || "Submission failed");
       }
-      setSubmitted(true);
-      setChallenge((prev) => ({ ...prev, status: "completed" }));
+      const data = await res.json();
+      setSubmissionResult(data);
+      const isCorrect = data.result === "correct";
+      setSubmitted(isCorrect);
+      setChallenge((prev) => ({
+        ...prev,
+        status: isCorrect ? "completed" : "in_progress",
+      }));
     } catch (e) {
       setError(e.message);
     } finally {
@@ -124,6 +160,18 @@ export default function ChallengeDetail() {
               </span>
               <span className="text-gray-300">·</span>
               <span className="text-xs text-gray-500">{challenge.repo_full_name}</span>
+              <span
+                className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[challenge.status] || "bg-gray-100 text-gray-600"}`}
+              >
+                Status: {STATUS_LABELS[challenge.status] || challenge.status}
+              </span>
+              {submissionResult?.result && (
+                <span
+                  className={`text-xs font-medium px-2 py-0.5 rounded-full ${RESULT_STYLES[submissionResult.result] || "bg-gray-100 text-gray-600"}`}
+                >
+                  Result: {RESULT_LABELS[submissionResult.result] || submissionResult.result}
+                </span>
+              )}
               <span className={`ml-auto text-xs font-medium px-2 py-0.5 rounded-full capitalize ${DIFFICULTY_STYLES[challenge.difficulty]}`}>
                 {challenge.difficulty}
               </span>
@@ -163,6 +211,44 @@ export default function ChallengeDetail() {
             </Card>
           )}
 
+          {submissionResult && (
+            <Card className="card-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <CardTitle className="text-base">Evaluation</CardTitle>
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${RESULT_STYLES[submissionResult.result] || "bg-gray-100 text-gray-600"}`}
+                  >
+                    {RESULT_LABELS[submissionResult.result] || "Reviewed"}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    Score: {submissionResult.score ?? 0}/100
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {submissionResult.feedback && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                      {submissionResult.feedback}
+                    </p>
+                  </div>
+                )}
+
+                {submissionResult.model_answer && (
+                  <details className="bg-gray-50 border border-gray-200 rounded-md p-3">
+                    <summary className="text-sm font-medium text-gray-700 cursor-pointer">
+                      Show model answer
+                    </summary>
+                    <pre className="mt-3 bg-gray-950 text-gray-100 rounded-lg p-3 overflow-x-auto text-sm leading-relaxed">
+                      <code>{submissionResult.model_answer}</code>
+                    </pre>
+                  </details>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Answer */}
           <Card className="card-shadow">
             <CardHeader>
@@ -195,14 +281,16 @@ export default function ChallengeDetail() {
                   </p>
                 </div>
               ) : (
-                <Button
-                  type="button"
-                  onClick={handleSubmit}
-                  loading={submitting}
-                  disabled={submitting || !answer.trim()}
-                >
-                  Submit answer
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    onClick={handleSubmit}
+                    loading={submitting}
+                    disabled={submitting || !answer.trim()}
+                  >
+                    {submissionResult ? "Resubmit answer" : "Submit answer"}
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>

@@ -17,7 +17,7 @@ function LanguageBadge({ lang }) {
 }
 
 export default function Repos() {
-  const { authFetch, user } = useAuth();
+  const { authFetch } = useAuth();
   const navigate = useNavigate();
   const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,8 +60,6 @@ export default function Repos() {
     }
   };
 
-  const hasGithub = !!user?.github_username;
-
   return (
     <div className="flex h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100/50 overflow-hidden">
       <SideBar />
@@ -73,7 +71,7 @@ export default function Repos() {
           </p>
         </div>
 
-        {!hasGithub && (
+        {!loading && repos.length === 0 && (
           <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
             <p className="text-sm text-amber-800 font-medium">
               No GitHub account connected.{" "}
@@ -96,11 +94,6 @@ export default function Repos() {
             {[...Array(6)].map((_, i) => (
               <div key={i} className="h-36 rounded-xl bg-gray-100 animate-pulse" />
             ))}
-          </div>
-        ) : repos.length === 0 ? (
-          <div className="text-center py-16 text-gray-500">
-            <p className="text-lg font-medium">No repositories found.</p>
-            <p className="text-sm mt-1">Make sure your GitHub account is connected.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
