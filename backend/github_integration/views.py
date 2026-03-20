@@ -282,7 +282,26 @@ class ChallengeSubmitView(APIView):
             return Response({'detail': 'code is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         submission = ChallengeSubmission.objects.create(challenge=challenge, code=code)
-        challenge.status = Challenge.Status.COMPLETED
+        evaluation = ai.evaluate_submission(
+            challenge={
+                'type': challenge.type,
+                'title': challenge.title,
+                'description': challenge.description,
+                'code_snippet': challenge.code_snippet or '',
+                'difficulty': challenge.difficulty,
+            },
+            submission=submission.code,
+        )
+        submission.score = evaluation.get('score', 0)
+        submission.result = evaluation.get('result', ChallengeSubmission.Result.PARTIAL)
+        submission.feedback = evaluation.get('feedback', '')
+        submission.model_answer = evaluation.get('model_answer', '')
+        submission.save()
+
+        if submission.result == ChallengeSubmission.Result.CORRECT:
+            challenge.status = Challenge.Status.COMPLETED
+        else:
+            challenge.status = Challenge.Status.IN_PROGRESS
         challenge.save()
 
         return Response(ChallengeSubmissionSerializer(submission).data, status=status.HTTP_201_CREATED)

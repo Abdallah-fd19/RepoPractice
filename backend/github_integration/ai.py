@@ -110,6 +110,25 @@ def _extract_json_array(text: str) -> str:
     return text
 
 
+def _extract_json_object(text: str) -> str:
+    """
+    Pull the first {...} JSON object from a model response.
+    """
+    text = re.sub(r'^```[a-zA-Z]*\n?', '', text.strip())
+    text = re.sub(r'\n?```$', '', text.strip())
+    text = text.strip()
+
+    if text.startswith('{') and text.endswith('}'):
+        return text
+
+    start = text.find('{')
+    end = text.rfind('}')
+    if start != -1 and end != -1 and end > start:
+        return text[start:end + 1]
+
+    return text
+
+
 def pick_files_for_challenge(file_paths: list, n: int = 5) -> list:
     """
     Pick a sample of user-authored code files from the repo tree.
@@ -173,3 +192,79 @@ CODE:
     raw = _extract_json_array(response.text)
     challenges = json.loads(raw)
     return challenges
+
+def evaluate_submission(challenge: dict, submission: str) -> dict:
+    """
+    Call Gemini to evaluate a user's submission to a challenge.
+
+    challenge: {"type", "title", "description", "code_snippet", "difficulty"}
+    submission: user's code/answer text
+
+    Returns dict: score, result, feedback, model_answer
+    """
+    prompt = f"""You are a strict but helpful coding challenge evaluator.
+
+Challenge metadata:
+- type: {challenge.get('type', '')}
+- title: {challenge.get('title', '')}
+- difficulty: {challenge.get('difficulty', '')}
+
+Challenge description:
+{challenge.get('description', '')}
+
+Reference snippet (may be empty):
+{challenge.get('code_snippet', '')}
+
+Developer submission:
+{submission}
+
+Evaluate the submission for correctness, completeness, and code quality.
+Return ONLY a raw JSON object with exactly these keys:
+- "score": integer from 0 to 100
+- "result": one of: correct | partial | incorrect
+- "feedback": concise actionable feedback (2-4 sentences)
+- "model_answer": a strong example solution or explanation
+"""
+
+    try:
+        client = _get_client()
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.2,
+                max_output_tokens=4096,
+            ),
+        )
+        raw = _extract_json_object(response.text)
+        parsed = json.loads(raw)
+    except Exception:
+        parsed = {
+            'score': 0,
+            'result': 'partial',
+            'feedback': 'Automatic evaluation is currently unavailable. Please review the submission manually.',
+            'model_answer': '',
+        }
+
+    score = parsed.get('score', 0)
+    try:
+        score = int(score)
+    except Exception:
+        score = 0
+    score = max(0, min(100, score))
+
+    result = str(parsed.get('result', 'partial')).lower().strip()
+    if result not in {'correct', 'partial', 'incorrect'}:
+        if score >= 80:
+            result = 'correct'
+        elif score >= 50:
+            result = 'partial'
+        else:
+            result = 'incorrect'
+
+    return {
+        'score': score,
+        'result': result,
+        'feedback': str(parsed.get('feedback', '')).strip(),
+        'model_answer': str(parsed.get('model_answer', '')).strip(),
+    }

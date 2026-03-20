@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Repo(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="repos")
@@ -58,9 +58,23 @@ class Challenge(models.Model):
 
 
 class ChallengeSubmission(models.Model):
+
+
+    class Result(models.TextChoices):
+        CORRECT = "correct", "Correct"
+        PARTIAL = "partial", "Partial"
+        INCORRECT = "incorrect", "Incorrect"
+
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, related_name="submissions")
     code = models.TextField()
     submitted_at = models.DateTimeField(auto_now_add=True)
+    score = models.IntegerField(
+    validators=[MinValueValidator(0), MaxValueValidator(100)],
+    default=0
+    )
+    result = models.CharField(max_length=20, choices=Result.choices, default=Result.PARTIAL)
+    feedback = models.TextField(blank=True, null=True)
+    model_answer = models.TextField(blank=True, null=True)
 
     class Meta:
         ordering = ["-submitted_at"]
