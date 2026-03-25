@@ -7,7 +7,7 @@ const Card = ({
   padding = 'default',
   ...props
 }) => {
-  const baseClass = 'bg-white rounded-xl';
+  const baseClass = 'bg-[var(--color-card)] rounded-xl border border-[var(--color-border-light)]';
   const shadowClass = shadow ? 'card-shadow' : '';
   
   const paddings = {
@@ -36,7 +36,7 @@ const CardHeader = ({ children, className = '', ...props }) => {
 
 const CardTitle = ({ children, className = '', ...props }) => {
   return (
-    <h2 className={`text-2xl font-bold text-gray-900 ${className}`} {...props}>
+    <h2 className={`text-2xl font-bold text-[var(--color-text)] ${className}`} {...props}>
       {children}
     </h2>
   );
@@ -44,7 +44,7 @@ const CardTitle = ({ children, className = '', ...props }) => {
 
 const CardDescription = ({ children, className = '', ...props }) => {
   return (
-    <p className={`text-gray-600 mt-2 ${className}`} {...props}>
+    <p className={`text-[var(--color-text-secondary)] mt-2 ${className}`} {...props}>
       {children}
     </p>
   );
@@ -60,7 +60,7 @@ const CardContent = ({ children, className = '', ...props }) => {
 
 const CardFooter = ({ children, className = '', ...props }) => {
   return (
-    <div className={`mt-6 pt-6 border-t border-gray-200 ${className}`} {...props}>
+    <div className={`mt-6 pt-6 border-t border-[var(--color-border)] ${className}`} {...props}>
       {children}
     </div>
   );

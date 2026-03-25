@@ -11,8 +11,6 @@ const GitHubCallback = () => {
 
   useEffect(() => {
     const exchangeCode = async () => {
-      // Prevent running the OAuth completion flow multiple times
-      // (e.g. due to React StrictMode double-invoking effects in development)
       if (hasCompletedRef.current) {
         return;
       }
@@ -29,17 +27,14 @@ const GitHubCallback = () => {
           return;
         }
 
-        // The backend will handle the OAuth exchange
-        // We'll use the session to get the tokens back
         const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         
-        // Complete the OAuth flow using the session established during redirect
         const response = await fetch(`${API_BASE_URL}/auth/github/complete/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          credentials: 'include', // Include cookies for session
+          credentials: 'include',
         });
 
         if (!response.ok) {
@@ -70,18 +65,18 @@ const GitHubCallback = () => {
   }, [searchParams, navigate, handleGithubCallback]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-[var(--color-bg)]">
       <div className="text-center">
         {error ? (
-          <div className="text-red-600">
+          <div className="text-[var(--color-error-text)]">
             <h2 className="text-xl font-semibold mb-2">Authentication Error</h2>
             <p>{error}</p>
-            <p className="text-sm text-gray-500 mt-4">Redirecting to login...</p>
+            <p className="text-sm text-[var(--color-text-muted)] mt-4">Redirecting to login...</p>
           </div>
         ) : (
           <div>
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4" />
-            <p className="text-gray-600">Completing GitHub authentication...</p>
+            <p className="text-[var(--color-text-secondary)]">Completing GitHub authentication...</p>
           </div>
         )}
       </div>

@@ -17,14 +17,14 @@ const Input = forwardRef(({
   return (
     <div className={`space-y-1 ${containerClassName}`}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-[var(--color-text-secondary)]">
           {label}
         </label>
       )}
       <div className="relative">
         {icon && iconPosition === 'left' && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <div className="text-gray-400 w-5 h-5">
+            <div className="text-[var(--color-text-muted)] w-5 h-5">
               {icon}
             </div>
           </div>
@@ -37,14 +37,14 @@ const Input = forwardRef(({
         />
         {icon && iconPosition === 'right' && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <div className="text-gray-400 w-5 h-5">
+            <div className="text-[var(--color-text-muted)] w-5 h-5">
               {icon}
             </div>
           </div>
         )}
       </div>
       {(error || helperText) && (
-        <p className={`text-xs ${error ? 'text-red-600' : 'text-gray-500'}`}>
+        <p className={`text-xs ${error ? 'text-[var(--color-error-text)]' : 'text-[var(--color-text-muted)]'}`}>
           {error || helperText}
         </p>
       )}

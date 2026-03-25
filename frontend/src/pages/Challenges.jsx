@@ -7,15 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../co
 const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const DIFFICULTY_STYLES = {
-  easy: "bg-emerald-100 text-emerald-700",
-  medium: "bg-amber-100 text-amber-700",
-  hard: "bg-red-100 text-red-700",
+  easy: "bg-emerald-500/15 text-emerald-600",
+  medium: "bg-amber-500/15 text-amber-600",
+  hard: "bg-red-500/15 text-red-600",
 };
 
 const STATUS_STYLES = {
-  pending: "bg-gray-100 text-gray-600",
-  in_progress: "bg-blue-100 text-blue-700",
-  completed: "bg-emerald-100 text-emerald-700",
+  pending: "bg-[var(--color-card-hover)] text-[var(--color-text-muted)]",
+  in_progress: "bg-blue-500/15 text-blue-500",
+  completed: "bg-emerald-500/15 text-emerald-500",
 };
 
 const TYPE_LABELS = {
@@ -60,15 +60,15 @@ export default function Challenges() {
   }, [repoFilter, statusFilter]);
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100/50 overflow-hidden">
+    <div className="flex h-screen bg-[var(--color-bg)] overflow-hidden">
       <SideBar />
       <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
         <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-[var(--color-text)]">
               {repoName ? `Challenges — ${repoName}` : "All Challenges"}
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-[var(--color-text-secondary)] mt-1">
               {repoName
                 ? "Freshly generated challenges from your repository."
                 : "All coding challenges across your repositories."}
@@ -78,7 +78,7 @@ export default function Challenges() {
             {repoFilter && (
               <button
                 onClick={() => navigate("/challenges")}
-                className="text-sm text-gray-500 hover:text-primary-600 underline"
+                className="text-sm text-[var(--color-text-muted)] hover:text-primary-600 underline"
               >
                 View all
               </button>
@@ -103,19 +103,19 @@ export default function Challenges() {
         </div>
 
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="mb-6 bg-[var(--color-error-bg)] border border-[var(--color-error-border)] rounded-lg p-4">
+            <p className="text-sm text-[var(--color-error-text)]">{error}</p>
           </div>
         )}
 
         {loading ? (
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-24 rounded-xl bg-gray-100 animate-pulse" />
+              <div key={i} className="h-24 rounded-xl shimmer-loading" />
             ))}
           </div>
         ) : challenges.length === 0 ? (
-          <div className="text-center py-16 text-gray-500">
+          <div className="text-center py-16 text-[var(--color-text-muted)]">
             <p className="text-lg font-medium">No challenges yet.</p>
             <p className="text-sm mt-1">
               Go to{" "}
@@ -133,7 +133,7 @@ export default function Challenges() {
             {challenges.map((c) => (
               <Card
                 key={c.id}
-                className="card-shadow hover:shadow-md transition-shadow cursor-pointer"
+                className="hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => navigate(`/challenges/${c.id}`)}
               >
                 <CardContent className="py-4">
@@ -143,19 +143,19 @@ export default function Challenges() {
                         <span className="text-xs font-semibold text-primary-600 uppercase tracking-wide">
                           {TYPE_LABELS[c.type] || c.type}
                         </span>
-                        <span className="text-gray-300">·</span>
-                        <span className="text-xs text-gray-500">{c.repo_name}</span>
+                        <span className="text-[var(--color-text-muted)]">·</span>
+                        <span className="text-xs text-[var(--color-text-muted)]">{c.repo_name}</span>
                         {c.file_path && (
                           <>
-                            <span className="text-gray-300">·</span>
-                            <span className="text-xs text-gray-400 font-mono truncate max-w-xs">
+                            <span className="text-[var(--color-text-muted)]">·</span>
+                            <span className="text-xs text-[var(--color-text-muted)] font-mono truncate max-w-xs">
                               {c.file_path}
                             </span>
                           </>
                         )}
                       </div>
-                      <h3 className="font-semibold text-gray-900 truncate">{c.title}</h3>
-                      <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{c.description}</p>
+                      <h3 className="font-semibold text-[var(--color-text)] truncate">{c.title}</h3>
+                      <p className="text-sm text-[var(--color-text-muted)] mt-0.5 line-clamp-2">{c.description}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1.5 shrink-0">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${DIFFICULTY_STYLES[c.difficulty]}`}>

@@ -8,9 +8,9 @@ import Button from "../components/Button.jsx";
 const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const DIFFICULTY_STYLES = {
-  easy: "bg-emerald-100 text-emerald-700",
-  medium: "bg-amber-100 text-amber-700",
-  hard: "bg-red-100 text-red-700",
+  easy: "bg-emerald-500/15 text-emerald-600",
+  medium: "bg-amber-500/15 text-amber-600",
+  hard: "bg-red-500/15 text-red-600",
 };
 
 const TYPE_LABELS = {
@@ -22,9 +22,9 @@ const TYPE_LABELS = {
 };
 
 const RESULT_STYLES = {
-  correct: "bg-emerald-100 text-emerald-700",
-  partial: "bg-amber-100 text-amber-700",
-  incorrect: "bg-red-100 text-red-700",
+  correct: "bg-emerald-500/15 text-emerald-600",
+  partial: "bg-amber-500/15 text-amber-600",
+  incorrect: "bg-red-500/15 text-red-600",
 };
 
 const RESULT_LABELS = {
@@ -34,9 +34,9 @@ const RESULT_LABELS = {
 };
 
 const STATUS_STYLES = {
-  pending: "bg-gray-100 text-gray-600",
-  in_progress: "bg-blue-100 text-blue-700",
-  completed: "bg-emerald-100 text-emerald-700",
+  pending: "bg-[var(--color-card-hover)] text-[var(--color-text-muted)]",
+  in_progress: "bg-blue-500/15 text-blue-500",
+  completed: "bg-emerald-500/15 text-emerald-500",
 };
 
 const STATUS_LABELS = {
@@ -113,13 +113,13 @@ export default function ChallengeDetail() {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100/50 overflow-hidden">
+      <div className="flex h-screen bg-[var(--color-bg)] overflow-hidden">
         <SideBar />
         <main className="flex-1 p-6 lg:p-8">
           <div className="space-y-4 max-w-3xl">
-            <div className="h-8 bg-gray-200 rounded animate-pulse w-1/2" />
-            <div className="h-48 bg-gray-100 rounded-xl animate-pulse" />
-            <div className="h-64 bg-gray-100 rounded-xl animate-pulse" />
+            <div className="h-8 rounded shimmer-loading w-1/2" />
+            <div className="h-48 rounded-xl shimmer-loading" />
+            <div className="h-64 rounded-xl shimmer-loading" />
           </div>
         </main>
       </div>
@@ -128,11 +128,11 @@ export default function ChallengeDetail() {
 
   if (error && !challenge) {
     return (
-      <div className="flex h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100/50 overflow-hidden">
+      <div className="flex h-screen bg-[var(--color-bg)] overflow-hidden">
         <SideBar />
         <main className="flex-1 p-6 lg:p-8">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-xl">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="bg-[var(--color-error-bg)] border border-[var(--color-error-border)] rounded-lg p-4 max-w-xl">
+            <p className="text-sm text-[var(--color-error-text)]">{error}</p>
           </div>
         </main>
       </div>
@@ -140,34 +140,32 @@ export default function ChallengeDetail() {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100/50 overflow-hidden">
+    <div className="flex h-screen bg-[var(--color-bg)] overflow-hidden">
       <SideBar />
       <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
-        {/* Back */}
         <button
           onClick={() => navigate(`/challenges?repo=${challenge.repo}`)}
-          className="text-sm text-gray-500 hover:text-primary-600 mb-4 flex items-center gap-1"
+          className="text-sm text-[var(--color-text-muted)] hover:text-primary-600 mb-4 flex items-center gap-1"
         >
           ← Back to challenges
         </button>
 
         <div className="max-w-3xl space-y-6">
-          {/* Header */}
           <div>
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="text-xs font-semibold text-primary-600 uppercase tracking-wide">
                 {TYPE_LABELS[challenge.type] || challenge.type}
               </span>
-              <span className="text-gray-300">·</span>
-              <span className="text-xs text-gray-500">{challenge.repo_full_name}</span>
+              <span className="text-[var(--color-text-muted)]">·</span>
+              <span className="text-xs text-[var(--color-text-muted)]">{challenge.repo_full_name}</span>
               <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[challenge.status] || "bg-gray-100 text-gray-600"}`}
+                className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[challenge.status] || "bg-[var(--color-card-hover)] text-[var(--color-text-muted)]"}`}
               >
                 Status: {STATUS_LABELS[challenge.status] || challenge.status}
               </span>
               {submissionResult?.result && (
                 <span
-                  className={`text-xs font-medium px-2 py-0.5 rounded-full ${RESULT_STYLES[submissionResult.result] || "bg-gray-100 text-gray-600"}`}
+                  className={`text-xs font-medium px-2 py-0.5 rounded-full ${RESULT_STYLES[submissionResult.result] || "bg-[var(--color-card-hover)] text-[var(--color-text-muted)]"}`}
                 >
                   Result: {RESULT_LABELS[submissionResult.result] || submissionResult.result}
                 </span>
@@ -176,27 +174,25 @@ export default function ChallengeDetail() {
                 {challenge.difficulty}
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">{challenge.title}</h1>
+            <h1 className="text-2xl font-bold text-[var(--color-text)]">{challenge.title}</h1>
             {challenge.file_path && (
-              <p className="text-sm font-mono text-gray-400 mt-1">{challenge.file_path}</p>
+              <p className="text-sm font-mono text-[var(--color-text-muted)] mt-1">{challenge.file_path}</p>
             )}
           </div>
 
-          {/* Description */}
-          <Card className="card-shadow">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Challenge</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+              <p className="text-[var(--color-text-secondary)] whitespace-pre-wrap leading-relaxed">
                 {challenge.description}
               </p>
             </CardContent>
           </Card>
 
-          {/* Code snippet */}
           {challenge.code_snippet && (
-            <Card className="card-shadow">
+            <Card>
               <CardHeader>
                 <CardTitle className="text-base">Code to work with</CardTitle>
                 {challenge.file_path && (
@@ -204,7 +200,7 @@ export default function ChallengeDetail() {
                 )}
               </CardHeader>
               <CardContent>
-                <pre className="bg-gray-950 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm leading-relaxed">
+                <pre className="bg-[var(--color-code-bg)] text-gray-100 rounded-lg p-4 overflow-x-auto text-sm leading-relaxed">
                   <code>{challenge.code_snippet}</code>
                 </pre>
               </CardContent>
@@ -212,35 +208,35 @@ export default function ChallengeDetail() {
           )}
 
           {submissionResult && (
-            <Card className="card-shadow">
+            <Card>
               <CardHeader>
                 <div className="flex items-center gap-2 flex-wrap">
                   <CardTitle className="text-base">Evaluation</CardTitle>
                   <span
-                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${RESULT_STYLES[submissionResult.result] || "bg-gray-100 text-gray-600"}`}
+                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${RESULT_STYLES[submissionResult.result] || "bg-[var(--color-card-hover)] text-[var(--color-text-muted)]"}`}
                   >
                     {RESULT_LABELS[submissionResult.result] || "Reviewed"}
                   </span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-[var(--color-text-muted)]">
                     Score: {submissionResult.score ?? 0}/100
                   </span>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {submissionResult.feedback && (
-                  <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                  <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-md p-3">
+                    <p className="text-sm text-[var(--color-text-secondary)] whitespace-pre-wrap">
                       {submissionResult.feedback}
                     </p>
                   </div>
                 )}
 
                 {submissionResult.model_answer && (
-                  <details className="bg-gray-50 border border-gray-200 rounded-md p-3">
-                    <summary className="text-sm font-medium text-gray-700 cursor-pointer">
+                  <details className="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-md p-3">
+                    <summary className="text-sm font-medium text-[var(--color-text)] cursor-pointer">
                       Show model answer
                     </summary>
-                    <pre className="mt-3 bg-gray-950 text-gray-100 rounded-lg p-3 overflow-x-auto text-sm leading-relaxed">
+                    <pre className="mt-3 bg-[var(--color-code-bg)] text-gray-100 rounded-lg p-3 overflow-x-auto text-sm leading-relaxed">
                       <code>{submissionResult.model_answer}</code>
                     </pre>
                   </details>
@@ -249,8 +245,7 @@ export default function ChallengeDetail() {
             </Card>
           )}
 
-          {/* Answer */}
-          <Card className="card-shadow">
+          <Card>
             <CardHeader>
               <CardTitle className="text-base">Your answer</CardTitle>
               <CardDescription>
@@ -269,14 +264,14 @@ export default function ChallengeDetail() {
               />
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                  <p className="text-sm text-red-600">{error}</p>
+                <div className="bg-[var(--color-error-bg)] border border-[var(--color-error-border)] rounded-md p-3">
+                  <p className="text-sm text-[var(--color-error-text)]">{error}</p>
                 </div>
               )}
 
               {submitted ? (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-md p-3">
-                  <p className="text-sm text-emerald-700 font-medium">
+                <div className="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-md p-3">
+                  <p className="text-sm text-[var(--color-success-text)] font-medium">
                     Challenge completed! Well done.
                   </p>
                 </div>

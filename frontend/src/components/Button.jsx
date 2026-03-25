@@ -16,8 +16,8 @@ const Button = forwardRef(({
   const variants = {
     primary: 'btn-primary',
     secondary: 'btn-secondary',
-    outline: 'border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-gray-500',
-    ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
+    outline: 'border border-[var(--color-input-border)] text-[var(--color-text-secondary)] bg-[var(--color-card)] hover:bg-[var(--color-card-hover)] focus:ring-gray-500',
+    ghost: 'text-[var(--color-text-secondary)] hover:bg-[var(--color-card-hover)] focus:ring-gray-500',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
   };
   

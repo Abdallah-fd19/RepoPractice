@@ -84,31 +84,31 @@ export default function Profile() {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100/50 overflow-hidden">
+    <div className="flex h-screen bg-[var(--color-bg)] overflow-hidden">
       <SideBar />
       <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-          <p className="text-gray-600">View and update your account details.</p>
+          <h1 className="text-3xl font-bold text-[var(--color-text)]">Profile</h1>
+          <p className="text-[var(--color-text-secondary)]">View and update your account details.</p>
         </div>
 
         <div className="max-w-2xl">
-          <Card className="card-shadow">
+          <Card>
             <CardHeader>
               <CardTitle>Account</CardTitle>
               <CardDescription>Username can be updated below; email and GitHub are read-only.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                <div className="h-16 w-16 rounded-full bg-[var(--color-card-hover)] overflow-hidden flex items-center justify-center">
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Avatar" className="h-full w-full object-cover" />
                   ) : (
-                    <span className="text-sm text-gray-500">No avatar</span>
+                    <span className="text-sm text-[var(--color-text-muted)]">No avatar</span>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Avatar</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Avatar</label>
                   <input
                     type="file"
                     accept="image/*"
@@ -119,15 +119,15 @@ export default function Profile() {
                         setAvatarPreview(URL.createObjectURL(file));
                       }
                     }}
-                    className="text-sm"
+                    className="text-sm text-[var(--color-text)]"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Upload a square image for best results.</p>
+                  <p className="text-xs text-[var(--color-text-muted)] mt-1">Upload a square image for best results.</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Username</label>
                   <input
                     type="text"
                     className="input-field"
@@ -137,16 +137,16 @@ export default function Profile() {
                   />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-1">Email</p>
-                  <div className="input-field bg-gray-50">{user?.email ?? "-"}</div>
+                  <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-1">Email</p>
+                  <div className="input-field bg-[var(--color-bg)]">{user?.email ?? "-"}</div>
                 </div>
               </div>
 
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-1">GitHub username</p>
-                <div className="input-field bg-gray-50">{githubUsername || "-"}</div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Managed by GitHub OAuth. You can’t edit this here.
+                <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-1">GitHub username</p>
+                <div className="input-field bg-[var(--color-bg)]">{githubUsername || "-"}</div>
+                <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                  Managed by GitHub OAuth. You can't edit this here.
                 </p>
               </div>
             </CardContent>
@@ -154,14 +154,14 @@ export default function Profile() {
 
           <div className="h-6" />
 
-          <Card className="card-shadow">
+          <Card>
             <CardHeader>
               <CardTitle>Profile</CardTitle>
               <CardDescription>Update your public profile info.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Bio</label>
                 <textarea
                   className="input-field min-h-28"
                   value={bio}
@@ -171,14 +171,14 @@ export default function Profile() {
               </div>
 
               {(localError || (error && (!user || error !== "Failed to load profile"))) && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                  <p className="text-sm text-red-600">{localError || error}</p>
+                <div className="bg-[var(--color-error-bg)] border border-[var(--color-error-border)] rounded-md p-3">
+                  <p className="text-sm text-[var(--color-error-text)]">{localError || error}</p>
                 </div>
               )}
 
               {successMessage && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-md p-3">
-                  <p className="text-sm text-emerald-700">{successMessage}</p>
+                <div className="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-md p-3">
+                  <p className="text-sm text-[var(--color-success-text)]">{successMessage}</p>
                 </div>
               )}
 
@@ -194,4 +194,3 @@ export default function Profile() {
     </div>
   );
 }
-

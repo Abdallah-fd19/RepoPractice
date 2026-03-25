@@ -28,7 +28,6 @@ const SignUp = () => {
   }, []);
 
   useEffect(() => {
-    // Calculate password strength
     if (formData.password) {
       let strength = 0;
       if (formData.password.length >= 8) strength++;
@@ -49,7 +48,6 @@ const SignUp = () => {
       [name]: type === 'checkbox' ? checked : value
     }));
     
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -140,7 +138,7 @@ const SignUp = () => {
     <button
       type="button"
       onClick={() => togglePasswordVisibility(field)}
-      className="text-gray-400 hover:text-gray-600 focus:outline-none"
+      className="text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] focus:outline-none"
     >
       {field === 'password' ? (showPassword ? (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,9 +163,9 @@ const SignUp = () => {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-[var(--color-bg)]">
       <div className="w-full max-w-md animate-fade-in">
-        <Card className="card-shadow">
+        <Card>
           <CardHeader className="text-center">
             <div className="mx-auto h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center mb-4">
               <svg className="h-6 w-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,7 +223,7 @@ const SignUp = () => {
                 {formData.password && (
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">Password strength</span>
+                      <span className="text-xs text-[var(--color-text-muted)]">Password strength</span>
                       <span className={`text-xs font-medium ${
                         passwordStrength <= 2 ? 'text-red-500' :
                         passwordStrength <= 3 ? 'text-yellow-500' :
@@ -235,13 +233,13 @@ const SignUp = () => {
                         {getPasswordStrengthText()}
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                    <div className="w-full bg-[var(--color-card-hover)] rounded-full h-1.5">
                       <div
                         className={`h-1.5 rounded-full transition-all duration-300 ${getPasswordStrengthColor()}`}
                         style={{ width: `${(passwordStrength / 5) * 100}%` }}
                       />
                     </div>
-                    <div className="text-xs text-gray-500 space-y-1">
+                    <div className="text-xs text-[var(--color-text-muted)] space-y-1">
                       <p className={/[A-Z]/.test(formData.password) ? 'text-green-500' : ''}>
                         • Contains uppercase letter
                       </p>
@@ -286,9 +284,9 @@ const SignUp = () => {
                         setErrors(prev => ({ ...prev, terms: '' }));
                       }
                     }}
-                    className="mt-0.5 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                    className="mt-0.5 h-4 w-4 text-primary-600 border-[var(--color-input-border)] rounded focus:ring-primary-500"
                   />
-                  <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
+                  <label htmlFor="terms" className="ml-2 text-sm text-[var(--color-text-secondary)]">
                     I agree to the{' '}
                     <Link to="/terms" className="text-primary-600 hover:text-primary-500 font-medium">
                       Terms and Conditions
@@ -300,13 +298,13 @@ const SignUp = () => {
                   </label>
                 </div>
                 {errors.terms && (
-                  <p className="text-xs text-red-600">{errors.terms}</p>
+                  <p className="text-xs text-[var(--color-error-text)]">{errors.terms}</p>
                 )}
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                  <p className="text-sm text-red-600">{error}</p>
+                <div className="bg-[var(--color-error-bg)] border border-[var(--color-error-border)] rounded-md p-3">
+                  <p className="text-sm text-[var(--color-error-text)]">{error}</p>
                 </div>
               )}
 
@@ -323,10 +321,10 @@ const SignUp = () => {
             <div className="mt-6">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
+                  <div className="w-full border-t border-[var(--color-border)]" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or sign up with</span>
+                  <span className="px-2 bg-[var(--color-card)] text-[var(--color-text-muted)]">Or sign up with</span>
                 </div>
               </div>
 
@@ -360,7 +358,7 @@ const SignUp = () => {
           </CardContent>
 
           <CardFooter className="text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-[var(--color-text-secondary)]">
               Already have an account?{' '}
               <Link
                 to="/login"
