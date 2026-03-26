@@ -37,6 +37,13 @@ export default function Challenges() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useState("");
+
+  const filtered = search.trim()
+    ? challenges.filter((c) =>
+        c.repo_name?.toLowerCase().includes(search.trim().toLowerCase())
+      )
+    : challenges;
 
   useEffect(() => {
     (async () => {
@@ -93,6 +100,13 @@ export default function Challenges() {
               <option value="in_progress">In Progress</option>
               <option value="completed">Completed</option>
             </select>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by repo name"
+              className="input-field text-sm py-1.5 w-48"
+            />
             <button
               onClick={() => navigate("/repos")}
               className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
@@ -114,23 +128,29 @@ export default function Challenges() {
               <div key={i} className="h-24 rounded-xl shimmer-loading" />
             ))}
           </div>
-        ) : challenges.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="text-center py-16 text-[var(--color-text-muted)]">
-            <p className="text-lg font-medium">No challenges yet.</p>
-            <p className="text-sm mt-1">
-              Go to{" "}
-              <button
-                onClick={() => navigate("/repos")}
-                className="text-primary-600 underline hover:text-primary-700"
-              >
-                Repos
-              </button>{" "}
-              and generate some.
-            </p>
+            {challenges.length === 0 ? (
+              <>
+                <p className="text-lg font-medium">No challenges yet.</p>
+                <p className="text-sm mt-1">
+                  Go to{" "}
+                  <button
+                    onClick={() => navigate("/repos")}
+                    className="text-primary-600 underline hover:text-primary-700"
+                  >
+                    Repos
+                  </button>{" "}
+                  and generate some.
+                </p>
+              </>
+            ) : (
+              <p className="text-lg font-medium">No challenges match "{search}"</p>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
-            {challenges.map((c) => (
+            {filtered.map((c) => (
               <Card
                 key={c.id}
                 className="hover:shadow-md transition-shadow cursor-pointer"
