@@ -148,9 +148,12 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # Session and CSRF cookie settings for cross-origin requests
-SESSION_COOKIE_SAMESITE = 'None'
+# NOTE:
+# In local HTTP development, SameSite=None cookies are often rejected unless Secure=True.
+# That can cause session loss (admin login loop and OAuth state/session mismatch).
+SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
-CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 
 # GitHub OAuth settings (set these in environment for production)
