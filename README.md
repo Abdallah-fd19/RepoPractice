@@ -2,6 +2,8 @@
 
 A full-stack web app that connects to your GitHub repositories and generates AI-powered coding challenges from your actual code. Practice refactoring, debugging, extending, testing, and explaining real code — then submit solutions and get instant AI evaluation with scores and feedback.
 
+### 🎬 [Watch Demo](https://youtu.be/DJ6ssMvwU0Q)
+
 ## ✨ Features
 
 - **GitHub OAuth** — sign in with GitHub to sync your repositories
